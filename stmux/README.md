@@ -1,6 +1,6 @@
 # Start TMUX
 
-`stmux` can help you start tmux more smoonthly.
+`stmux` can help you start [tmux](https://github.com/tmux/tmux/wiki) more smoonthly.
 
 ## How to
 

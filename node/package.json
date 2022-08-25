@@ -1,0 +1,17 @@
+{
+  "name": "toolkits",
+  "version": "0.1.0",
+  "description": "toolkits written by node.js",
+  "main": "index.js",
+  "bin": {
+    "cdate": "./cdate.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "taccisum",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^9.4.0"
+  }
+}

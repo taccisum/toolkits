@@ -13,7 +13,7 @@ program.description(pkg.description);
 program.usage('[command] [options]');
 
 function print_date(d) {
-    console.log('Date Time: ', d)
+    console.log('Date Time: ', d.toLocaleString('zh-cn'))
     console.log('Timestamp(s): ', Math.floor(d.getTime() / 1000))
     console.log('Timestamp(ms): ', d.getTime())
 }
@@ -22,6 +22,7 @@ program.command('convert', {isDefault: true})
 .description('')
 .argument('[date]', 'date string or timestamp')
 .action(async (date, opts) => {
+    process.env.TZ = 'Asia/Shanghai'
     let d
     if (!date) {
         d = new Date()

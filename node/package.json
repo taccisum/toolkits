@@ -4,7 +4,8 @@
   "description": "toolkits written by node.js",
   "main": "index.js",
   "bin": {
-    "cdate": "./cdate.js"
+    "cdate": "./cdate.js",
+    "mvn_patch": "./mvn_patch.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +13,9 @@
   "author": "taccisum",
   "license": "ISC",
   "dependencies": {
-    "commander": "^9.4.0"
+    "chalk": "^4.1.2",
+    "commander": "^9.4.0",
+    "execa": "^5.1.1",
+    "uuid": "^9.0.0"
   }
 }

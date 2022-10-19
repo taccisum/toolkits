@@ -13,7 +13,7 @@ const { Command, Argument }  = require('commander')
 let program = new Command();
 
 program.version('0.1', '-v --version');
-program.description('Add patch for you maven pom.');
+program.description('This tool can add a patch for your Maven project very quickly.');
 program.usage('[command] [options]');
 
 function err(msg) {
@@ -22,11 +22,12 @@ function err(msg) {
 }
 
 program.command('commit', { isDefault: true })
-.description('此工具可以帮你快速向一个 Maven 项目添加补丁')
+.description('This tool can add a patch for your Maven project very quickly.')
 .option('-f --file <config>', 'config file')
 .option('-p --patch-key <key>', 'patch key')
 .option('-r --repo <uri>', 'repository uri')
 .option('-m --module <module>', 'repository uri')
+.option('--push', 'push automatically after patching')
 .action(async (opts) => {
     const id = uuid(10);
     const file = opts.file || '~/.mvn_patch.json'
@@ -57,10 +58,15 @@ program.command('commit', { isDefault: true })
         })
     }
 
-    console.log(chalk.bold.blue(`Fork new branch ${patch.branch.new}`))
-    await execa('git', [ 'checkout', '-b', patch.branch.new ], {
-        stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
-    })
+    if (patch.branch.new) {
+        console.log(chalk.bold.blue(`Fork new branch ${patch.branch.new}`))
+        await execa('git', [ 'checkout', '-b', patch.branch.new ], {
+            stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
+        })
+    }
+
+    const headRef = String(fs.readFileSync(path.join('.git', 'HEAD'))).trim('\n').trim()
+    const cb = headRef.replace(/.+heads\//, '')   // extract current branch name
 
     const handler = require(`./mvn_patch/${patch.type}`)
     await handler.handlePatch(patch, opts, tmpDir)
@@ -72,7 +78,16 @@ program.command('commit', { isDefault: true })
         stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
     })
 
-    console.log(chalk.bold.green(`Now you can go to directory '${chalk.blue(tmpDir)}' for more further operations.`))
+    if (opts.push) {
+        await execa('git', [ 'push', 'origin', cb ], {
+            stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
+        })
+    } else {
+        const cp = require('copy-paste')
+        cp.copy(`cd ${tmpDir}`, () => {
+            console.log(chalk.bold.green(`Now you can go to the work directory '${chalk.white.bgBlue(tmpDir)}'(Jump command has been copied. Try ctrl-v) for more further operations.`))
+        })
+    }
 });
 
 program.parse()

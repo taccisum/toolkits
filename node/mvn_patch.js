@@ -6,6 +6,7 @@ const { uuid } = require('./utils/id')
 const { abs_path } = require('./utils/file')
 const chalk = require('chalk')
 const execa = require('execa')
+const _ = require('lodash')
 
 const { Command, Argument }  = require('commander')
 
@@ -21,7 +22,7 @@ function err(msg) {
 }
 
 program.command('commit', { isDefault: true })
-.description('此工具可以帮你快速向一个 Maven 项目添加 补充')
+.description('此工具可以帮你快速向一个 Maven 项目添加补丁')
 .option('-f --file <config>', 'config file')
 .option('-p --patch-key <key>', 'patch key')
 .option('-r --repo <uri>', 'repository uri')
@@ -29,48 +30,45 @@ program.command('commit', { isDefault: true })
 .action(async (opts) => {
     const id = uuid(10);
     const file = opts.file || '~/.mvn_patch.json'
-    const { repo, patchKey, module } = opts
+    const { repo, patchKey } = opts
     if (!repo) err('Required option \"repo\"')
-    if (!patchKey) err('Required option \"patch\"')
 
     const patchs = JSON.parse(fs.readFileSync(abs_path(file)))
-    const patch = patchs[patchKey]
+    let patch = patchs[patchKey] || {}
+    patch = _.assign({
+        type: 'common',
+        branch: {
+            new: 'chore/mvn_patch',
+        },
+        commitMsg: 'chore: add patch'
+    }, patch)
 
     let tmpDir = path.join('/tmp', 'toolkits', 'mvn_patch', id)
     fs.mkdirSync(tmpDir, { recursive: true })
+    console.log(chalk.bold.blue(`Clone remote repositofy ${repo}`))
     await execa('git', [ 'clone', repo, tmpDir ], {
         stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
     })
-    process.chdir(tmpDir)
-    console.log(process.cwd())
-    await execa('git', [ 'checkout', '-b', 'chore/mvn_patch' ], {
+    process.chdir(tmpDir)       // Change current work directory to temporary dir
+    if (patch.branch.from) {
+        console.log(chalk.bold.blue(`Switch to branch ${patch.branch.from}`))
+        await execa('git', [ 'checkout', patch.branch.from ], {
+            stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
+        })
+    }
+
+    console.log(chalk.bold.blue(`Fork new branch ${patch.branch.new}`))
+    await execa('git', [ 'checkout', '-b', patch.branch.new ], {
         stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
     })
 
-    const pomPath = !module ? `pom.xml` : `${module}/pom.xml`
-
-    const contentToBeAdd = 
-`<!-- Skywalking enhance add by mvn_patch.js start -->
-<dependency>
-    <groupId>${patch.groupId}</groupId>
-    <artifactId>${patch.artifactId}</artifactId>
-    <version>${patch.version}</version>
-</dependency>
-<!-- Skywalking enhance add by mvn_patch.js end -->`
-    
-    const lines = String(fs.readFileSync(pomPath)).split('\n')
-    lines.unshift(...contentToBeAdd.split('\n'))
-    fs.writeFileSync(pomPath, lines.reduce((p, n) => `${p}\n${n}`))
-
-    await execa('vim', [ pomPath ], {
-        stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
-    })
-    // await execa('git', [ 'diff', 'pom.xml' ], {stdout: process.stdout})
+    const handler = require(`./mvn_patch/${patch.type}`)
+    await handler.handlePatch(patch, opts, tmpDir)
 
     await execa('git', [ 'add', '.'], {
         stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
     })
-    await execa('git', [ 'commit', '-m', patch.commitMsg || 'chore: add patch' ], {
+    await execa('git', [ 'commit', '-m', patch.commitMsg ], {
         stdin: process.stdin, stdout: process.stdout, stderr: process.stderr
     })
 

@@ -57,7 +57,7 @@ module.exports = {
         }
 
         poms.forEach(pom => {
-            // for each all pom.xml n' find target dependency to upgrade
+            // for-each all pom.xml n' find target dependency to upgrade
             _upgrade(pom, groupId, artifactId, newVersion)
         })
 

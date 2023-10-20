@@ -30,6 +30,8 @@ function parse_date(date) {
         } else if (/-| |\./.test(date)) {
             d = new Date(date)      // maybe a utc string
         } else {
+            if (String(date).length == 10) date = date * 1000;
+
             const tstamp = Number.parseInt(date)
             if (tstamp) {
                 d = new Date(tstamp)

@@ -5,6 +5,17 @@ describe('cdate.test.js', () => {
     it('parse timestamp', () => {
         d = cdate.parse_date(1691648714536)
         assert.strictEqual(d.toISOString(), '2023-08-10T06:25:14.536Z')
+
+        d = cdate.parse_date('1691648714536')
+        assert.strictEqual(d.toISOString(), '2023-08-10T06:25:14.536Z')
+    });
+
+    it('parse timestamp(s)', () => {
+        d = cdate.parse_date(1691648714)
+        assert.strictEqual(d.toISOString(), '2023-08-10T06:25:14.000Z')
+
+        d = cdate.parse_date('1691648714')
+        assert.strictEqual(d.toISOString(), '2023-08-10T06:25:14.000Z')
     });
 
     it('parse utc-like string', () => {

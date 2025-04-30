@@ -5,6 +5,7 @@
   "main": "index.js",
   "bin": {
     "cdate": "./cdate.js",
+    "clean": "./clean.js",
     "mvn_patch": "./mvn_patch.js"
   },
   "scripts": {

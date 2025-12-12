@@ -28,6 +28,7 @@ program
     console.log(`Start reading file: ${file}`);
     const in_fst = fs.createReadStream(file);
     const out_fst = fs.createWriteStream(out);
+    // 这里使用流式处理避免打爆内存
     const rl = readline.createInterface({
       input: in_fst,
       crlfDelay: Infinity, // 自动识别不同操作系统的换行符

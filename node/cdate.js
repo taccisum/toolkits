@@ -20,6 +20,7 @@ function print_date(d) {
 }
 
 function parse_date(date) {
+    // TODO:: 已迁移 ./utils/date.js，后续重构
     process.env.TZ = 'Asia/Shanghai'
     let d
     if (!date) {

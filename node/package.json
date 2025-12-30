@@ -7,7 +7,10 @@
     "cdate": "./cdate.js",
     "clean": "./clean.js",
     "jwt": "./jwt.js",
-    "mvn_patch": "./mvn_patch.js"
+    "mvn_patch": "./mvn_patch.js",
+    
+    "bd-extract-requirements": "./baidu/extract_requirements.js",
+    "bd-gen-weekly-sprint-md": "./baidu/gen_weekly_sprint_md.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

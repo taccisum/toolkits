@@ -10,7 +10,8 @@
     "mvn_patch": "./mvn_patch.js",
     
     "bd-extract-requirements": "./baidu/extract_requirements.js",
-    "bd-gen-weekly-sprint-md": "./baidu/gen_weekly_sprint_md.js"
+    "bd-gen-weekly-sprint-md": "./baidu/gen_weekly_sprint_md.js",
+    "bd-gen-oapi-doc": "./baidu/gen_oapi_doc/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

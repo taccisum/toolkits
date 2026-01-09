@@ -14,4 +14,28 @@ describe('index.test.js', () => {
       );
     });
   });
+
+  describe('#normalize', () => {
+    it('smoking', () => {
+      let data = {
+        info: {
+          api_path: 'resources/instance/set-wallpaper',
+        },
+      };
+
+      mod.normalize(data);
+      assert.ok(data.info.api_path === 'resources/instance/set-wallpaper');
+    });
+
+    it('handle irregular value', () => {
+      let data = {
+        info: {
+          api_path: '/resources/instance/set-wallpaper',
+        },
+      };
+
+      mod.normalize(data);
+      assert.ok(data.info.api_path === 'resources/instance/set-wallpaper');
+    });
+  });
 });

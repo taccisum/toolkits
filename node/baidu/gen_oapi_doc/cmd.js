@@ -29,6 +29,13 @@ function build_example_page_path(scene) {
   return `/?d=bgs-${scene}&p=${ page_name_prefix_map[scene] || scene.toUpperCase() + '_API_use' }`;
 }
 
+function normalize(data) {
+    if (data.info.api_path.startsWith('/')) {
+        console.log('trim data.info')
+        data.info.api_path = data.info.api_path.substring(1)
+    }
+}
+
 program
   .command('main', { isDefault: true })
   .description('Generate API doc for project bgs-doc.')
@@ -64,6 +71,7 @@ program
       },
     };
     _.assignIn(data.info, configs.info); // 合并默认参数与外部参数
+    normalize(data)     // 一般化非标准格式输入，避免造成最终格式问题
 
     // 5. 按业务场景分别输出文件至对应的目标路径（bgs-doc 项目）
     const proj_root = configs.project.root_path;
@@ -178,5 +186,6 @@ module.exports = {
     // Export those private methods for usage of unit tests
     test: {
       build_example_page_path,
+      normalize,
     },
 }

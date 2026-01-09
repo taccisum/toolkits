@@ -1,5 +1,5 @@
 const assert = require('assert');
-const mod = require('./index.js').test;
+const mod = require('./cmd.js').test;
 
 describe('index.test.js', () => {
   describe('#build_example_page_path', () => {

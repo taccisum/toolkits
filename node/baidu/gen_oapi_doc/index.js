@@ -1,6 +1,6 @@
 #!/usr/local/bin/node
 
-// 用于生成 bgs-doc 中的新增 api 文档内容
+// 用于生成 bgs-doc 中的新增 API 文档内容
 
 // TODO:: 
 // 1. 将 node/1.js 这个配置文件模板化，并支持通过命令快速在当前执行路径生成一个配置文件供修改
@@ -8,10 +8,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const _ = require('lodash');
+const chalk = require('chalk')
 
 const { Command, Argument } = require('commander');
+const metadata = require('./tmpl/metadata');
 
 let program = new Command();
 
@@ -23,9 +24,9 @@ program.description(pkg.description);
 program.usage('[command] [options]');
 
 program
-  .command('parse', { isDefault: true })
-  .description('')
-  .argument('[cfg_file]', 'config file')
+  .command('main', { isDefault: true })
+  .description('Generate API doc for project bgs-doc.')
+  .argument('<cfg_file>', 'config file')
   .action(async (cfg_file, opts) => {
     // 1. 读取基础信息（模板、外部配置等）
     const tmpl_path = path.join(__dirname, 'tmpl');
@@ -90,7 +91,7 @@ program
         game: 'API_base',
       }
       const file_name0 = file_name.replace('.md', '')
-      const code = (code_prefix_map[scene] || `${scene.toUpperCase()}_API_base`) + file_name0
+      const code = (code_prefix_map[scene] || `${scene.toUpperCase()}_API_base`) + `_${file_name0}`
       console.log(`请在 public/doc/bgs-${scene}/index.json 的 '基础能力相关接口' children 下加入以下内容
 {
     "name": "${scene_data.info.api_name}",
@@ -111,12 +112,48 @@ program
 
       // 打印运行时检查指南
       // TODO:: game 的前缀
-      const check_url = `http://localhost:8080/?d=bgs-${scene}&p=${scene.toUpperCase()}_API_baseduapk_image_create`;
+      const check_url = `http://localhost:8080/?d=bgs-${scene}&p=${scene.toUpperCase()}_API_base_${file_name0}`;
       console.log(`请在原项目执行 npm run dev 后，打开 ${check_url} 对生成的文档内容进行检查`)
 
       console.log(`✓ 场景 ${scene} 处理完毕`)
       console.log()
     });
+  });
+
+/**
+ * Style WARNING
+ */
+function s_warn(str) {
+  return chalk.bold(chalk.red(str))
+}
+
+// new 命令，用于创建 API 元数据文件
+program
+  .command('new')
+  .description('Create a new API doc metadata file.')
+  .argument('[type]', 'Specify the type of the API. Now supportted types: [base]', 'base')
+  .option('-n, --name <name>', 'API name')
+  .action(async (type, opts) => {
+    if (type === 'base') {
+      // 设置模板占位符识别正则表达式，避免与原 md 中的 '${xxx}' 冲突
+      _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+      const tmpl_path = path.join(__dirname, 'tmpl');
+      const metadata_tmpl_content = String(fs.readFileSync(path.join(tmpl_path, 'metadata.js')));
+      const api_name = opts.name || 'untitled_api';
+
+      const data = {
+        name: api_name,
+      }
+      const compiled = _.template(metadata_tmpl_content);
+
+      const metadata_content = compiled(data);
+
+      const file_name = `${api_name }.js`;
+      fs.writeFileSync(file_name, metadata_content);
+      console.log(`New '${type}' metadata file ${file_name} has been created.`)
+    } else {
+      console.warn(s_warn(`× Not yet supported type: ${type}`));
+    }
   });
 
 program.parse();

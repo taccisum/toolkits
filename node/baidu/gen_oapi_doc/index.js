@@ -1,8 +1,8 @@
 #!/usr/local/bin/node
 
-// 用于生成 bgs-doc 中的新增 API 文档内容
+// 用于生成 aPaaS bgs-doc 中的新增 API 文档内容
 
-// TODO:: 
+// TODO:: 规划中的功能
 // 1. 将 node/1.js 这个配置文件模板化，并支持通过命令快速在当前执行路径生成一个配置文件供修改 ✓
 // 2. 对非 base 场景（如 callback） 进行支持
 
@@ -12,7 +12,6 @@ const _ = require('lodash');
 const chalk = require('chalk')
 
 const { Command, Argument } = require('commander');
-const metadata = require('./tmpl/metadata');
 
 const style = require('../../utils/style.js')
 
@@ -24,6 +23,13 @@ let pkg = JSON.parse(
 program.version(pkg.version, '-v --version');
 program.description(pkg.description);
 program.usage('[command] [options]');
+
+function build_example_page_path(scene) {
+  const page_name_prefix_map = {
+    game: 'API_use',
+  };
+  return `/?d=bgs-${scene}&p=${ page_name_prefix_map[scene] || scene.toUpperCase() + '_API_use' }`;
+}
 
 program
   .command('main', { isDefault: true })
@@ -69,23 +75,20 @@ program
 
     apply_to.forEach((scene) => {
       console.log(style.hightlight(`🚀 即将为 ${scene} 场景生成 API 文档...`))
-      const page_name_prefix_map = {
-        game: 'API_use',
-      };
 
-      // 构建场景专属上下文
+      // 基于通用上下文，构建场景专用上下文
       let scene_data = _.assignIn(
         {
           scene: scene,
-          call_example_page: `/?d=bgs-${scene}&p=${ page_name_prefix_map[scene] || scene.toUpperCase() + '_API_use' }`
+          call_example_page: build_example_page_path(scene),
         },
         data
       );
 
-      // 生成最终内容并写入
+      // 生成最终内容，并写入目标项目
       let doc_content = compiled(scene_data);
-      let folder = `bgs-${scene}/md/api/base`;
-      let file_path = path.join(proj_root, doc_path, folder, file_name);
+      let target_folder = `bgs-${scene}/md/api/base`;
+      let file_path = path.join(proj_root, doc_path, target_folder, file_name);
       if (opts.md) {
         console.log(`Write file for scene ${scene}:`, file_path);
         fs.writeFileSync(file_path, doc_content);
@@ -167,8 +170,20 @@ program
       fs.writeFileSync(file_name, metadata_content);
       console.log(`New '${type}' metadata file ${file_name} has been created.`)
     } else {
-      console.warn(s_warn(`× Not yet supported type: ${type}`));
+      console.warn(s_warn(`× Not yet supported API type: ${type}`));
     }
   });
 
-program.parse();
+if (require.main === module) {
+  // 直接执行时才进行 parse
+  program.parse();
+} else {
+  module.exports = {
+    // Export those private methods for usage of unit tests
+    test: {
+      build_example_page_path,
+    }
+  }
+}
+
+

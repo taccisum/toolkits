@@ -5,7 +5,9 @@
 > 注意：请勿在 project 根目录开发，应先 `cd /node`
 
 
-## jwt
+## How to
+
+### jwt
 
 parse jwt token and display related info.
 
@@ -24,7 +26,7 @@ Payload: {"iss":"armvm_app","exp":1765516842,"uuid":"9dc8c33ad0d64347bcc39779f78
 
 
 
-## clean
+### clean
 
 clear invalid data
 
@@ -38,6 +40,11 @@ $ clean -t json -o out.txt 1.txt
 
 
 
+### baidu
+
+baidu 工作内部专用工具，一般不具备普适性，详细请查看 [baidu/README.md](./baidu/README.md)
 
 
+## Unit Tests
 
+  npm run test

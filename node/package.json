@@ -14,7 +14,7 @@
     "bd-gen-oapi-doc": "./baidu/gen_oapi_doc/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/*.test.js */**/*.test.js"
   },
   "author": "taccisum",
   "license": "ISC",

@@ -1,6 +1,8 @@
 // bgs-doc base 类型 API 文档元描述文件
 
 module.exports = {
+  // 接口类型，目前仅支持 base
+  type: 'base',
   // 应用至哪些业务场景下 game/oem/phone
   apply_to: ['game', 'oem', 'phone'],
   // 目标文件名

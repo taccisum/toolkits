@@ -3,7 +3,7 @@
 // 用于生成 bgs-doc 中的新增 API 文档内容
 
 // TODO:: 
-// 1. 将 node/1.js 这个配置文件模板化，并支持通过命令快速在当前执行路径生成一个配置文件供修改
+// 1. 将 node/1.js 这个配置文件模板化，并支持通过命令快速在当前执行路径生成一个配置文件供修改 ✓
 // 2. 对非 base 场景（如 callback） 进行支持
 
 const fs = require('fs');
@@ -13,6 +13,8 @@ const chalk = require('chalk')
 
 const { Command, Argument } = require('commander');
 const metadata = require('./tmpl/metadata');
+
+const style = require('../../utils/style.js')
 
 let program = new Command();
 
@@ -27,6 +29,7 @@ program
   .command('main', { isDefault: true })
   .description('Generate API doc for project bgs-doc.')
   .argument('<cfg_file>', 'config file')
+  .option('--no-md', 'Do not create markdown file.')
   .action(async (cfg_file, opts) => {
     // 1. 读取基础信息（模板、外部配置等）
     const tmpl_path = path.join(__dirname, 'tmpl');
@@ -65,7 +68,7 @@ program
     const file_name = configs.file_name;
 
     apply_to.forEach((scene) => {
-      console.log(`即将为 ${scene} 场景生成 API 文档...`)
+      console.log(style.hightlight(`🚀 即将为 ${scene} 场景生成 API 文档...`))
       const page_name_prefix_map = {
         game: 'API_use',
       };
@@ -83,22 +86,32 @@ program
       let doc_content = compiled(scene_data);
       let folder = `bgs-${scene}/md/api/base`;
       let file_path = path.join(proj_root, doc_path, folder, file_name);
-      console.log(`Write file for scene ${scene}`, file_path);
-      fs.writeFileSync(file_path, doc_content);
+      if (opts.md) {
+        console.log(`Write file for scene ${scene}:`, file_path);
+        fs.writeFileSync(file_path, doc_content);
+      } else {
+        console.log(style.tip('Skip markdown generation.'))
+      }
+
+      // 打印后续操作步骤指南
+      let cur_step = 1;   // 记录当前步骤
 
       // 打印 index.json 修改指南
       const code_prefix_map = {
         game: 'API_base',
       }
-      const file_name0 = file_name.replace('.md', '')
-      const code = (code_prefix_map[scene] || `${scene.toUpperCase()}_API_base`) + `_${file_name0}`
-      console.log(`请在 public/doc/bgs-${scene}/index.json 的 '基础能力相关接口' children 下加入以下内容
+      const file_name_no_ext = file_name.replace('.md', '')
+      const code = (code_prefix_map[scene] || `${scene.toUpperCase()}_API_base`) + `_${file_name_no_ext}`
+
+      console.log(`${cur_step++}. 请在 public/doc/bgs-${scene}/index.json 的 '基础能力相关接口' children 数组内加入以下内容：`);
+      console.log()
+      console.log(style.low_key(`
 {
     "name": "${scene_data.info.api_name}",
     "desc": "${scene_data.info.usage_background}",
     "code": "${code}",
     "path": "/API/base",
-    "file": "${file_name0}",
+    "file": "${file_name_no_ext}",
     "headings": [
         "基本信息",
         "请求参数",
@@ -108,20 +121,22 @@ program
         "异常示例"
     ]
 },
-        `);
+        `.trim()))
+      console.log()   // 前后留空一行方便复制
 
       // 打印运行时检查指南
-      // TODO:: game 的前缀
-      const check_url = `http://localhost:8080/?d=bgs-${scene}&p=${scene.toUpperCase()}_API_base_${file_name0}`;
-      console.log(`请在原项目执行 npm run dev 后，打开 ${check_url} 对生成的文档内容进行检查`)
+      // TODO:: game 的前缀不对
+      const check_url = `http://localhost:8080/?d=bgs-${scene}&p=${scene.toUpperCase()}_API_base_${file_name_no_ext}`;
+      console.log(`${cur_step++}. 请在原项目执行 npm run dev 后，打开 ${style.link(check_url)} 对生成的文档内容进行检查`)
 
-      console.log(`✓ 场景 ${scene} 处理完毕`)
+      console.log(style.success(`✓ 场景 ${scene} 处理完毕 🎉`))
       console.log()
     });
   });
 
 /**
  * Style WARNING
+ * @deprecated use style.js
  */
 function s_warn(str) {
   return chalk.bold(chalk.red(str))

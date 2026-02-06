@@ -8,10 +8,10 @@
     "clean": "./clean.js",
     "jwt": "./jwt.js",
     "mvn_patch": "./mvn_patch.js",
-    
     "bd-extract-requirements": "./baidu/extract_requirements.js",
     "bd-gen-weekly-sprint-md": "./baidu/gen_weekly_sprint_md.js",
-    "bd-gen-oapi-doc": "./baidu/gen_oapi_doc/index.js"
+    "bd-gen-oapi-doc": "./baidu/gen_oapi_doc/index.js",
+    "bd-gen-vo": "./baidu/gen_vo.mjs"
   },
   "scripts": {
     "test": "mocha test/*.test.js */**/*.test.js"
@@ -23,6 +23,7 @@
     "commander": "^9.4.0",
     "copy-paste": "^1.3.0",
     "execa": "^5.1.1",
+    "inquirer": "^13.2.2",
     "json-web-token": "^3.2.0",
     "lodash": "^4.17.21",
     "uuid": "^9.0.0"
